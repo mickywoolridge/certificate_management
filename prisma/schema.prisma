@@ -1,0 +1,34 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NoticeUnit {
+  DAYS
+  WEEKS
+  MONTHS
+}
+
+model Certificate {
+  id                     String      @id @default(uuid())
+  system                 String
+  name                   String
+  startDate              DateTime
+  endDate                DateTime
+  description            String?
+  ownerName              String
+  ownerEmail             String
+  noticeQuantity         Int
+  noticeUnit             NoticeUnit
+  /// Set when the owner was notified that this certificate entered its notice window (once per renewal cycle).
+  noticeEntryNotifiedAt  DateTime?
+  createdAt              DateTime    @default(now())
+  updatedAt              DateTime    @updatedAt
+
+  @@index([endDate])
+  @@index([ownerEmail])
+}
