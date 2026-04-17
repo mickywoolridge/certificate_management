@@ -7,9 +7,9 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "node scripts/prisma-generate-with-fallback.cjs && next build",
     "start": "next start",
-    "postinstall": "prisma generate",
+    "postinstall": "node scripts/prisma-generate-with-fallback.cjs",
     "db:bootstrap": "bash scripts/bootstrap-local-postgres.sh",
     "db:migrate": "prisma migrate deploy",
     "db:push": "prisma db push",
