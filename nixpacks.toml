@@ -1,0 +1,5 @@
+# @prisma/client runs `prisma generate` in its postinstall before the root
+# package's scripts; that fails on Railway without DATABASE_URL (P1012). Skip
+# that hook and rely on package.json postinstall (scripts/prisma-generate-with-fallback.cjs).
+[variables]
+PRISMA_SKIP_POSTINSTALL_GENERATE = '1'

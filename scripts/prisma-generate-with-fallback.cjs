@@ -6,9 +6,10 @@
  */
 const { execSync } = require("node:child_process");
 
-if (!process.env.DATABASE_URL) {
+const url = process.env.DATABASE_URL?.trim();
+if (!url) {
   process.env.DATABASE_URL =
     "postgresql://placeholder:placeholder@127.0.0.1:5432/placeholder?schema=public";
 }
 
-execSync("prisma generate", { stdio: "inherit", env: process.env });
+execSync("npx prisma generate", { stdio: "inherit", env: process.env });
