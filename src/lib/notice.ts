@@ -12,7 +12,7 @@ export function noticeWindowStart(endDate: Date, quantity: number, unit: NoticeU
   return d;
 }
 
-/** True when now is on or after the notice window start and the certificate is not yet expired. */
+/** True when now is on or after the notice window start and the tracked object is not yet expired. */
 export function isInNoticePeriod(cert: Pick<Certificate, "endDate" | "noticeQuantity" | "noticeUnit">, now = new Date()): boolean {
   const start = noticeWindowStart(cert.endDate, cert.noticeQuantity, cert.noticeUnit);
   return now >= start && now <= cert.endDate;

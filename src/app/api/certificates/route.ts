@@ -13,6 +13,7 @@ export async function GET(request: Request) {
   const dashboard = searchParams.get("dashboard") === "1";
 
   const rows = await prisma.certificate.findMany({
+    include: { objectType: true },
     orderBy: { endDate: "asc" },
   });
 
@@ -36,6 +37,7 @@ export async function POST(request: Request) {
   const ownerEmail = typeof body.ownerEmail === "string" ? body.ownerEmail.trim() : "";
   const description =
     typeof body.description === "string" && body.description.trim() ? body.description.trim() : null;
+  const objectTypeId = typeof body.objectTypeId === "string" ? body.objectTypeId.trim() : "";
 
   const noticeQuantity = Number(body.noticeQuantity);
   const noticeUnit = parseNoticeUnit(body.noticeUnit);
@@ -43,8 +45,11 @@ export async function POST(request: Request) {
   const startDate = body.startDate ? new Date(String(body.startDate)) : null;
   const endDate = body.endDate ? new Date(String(body.endDate)) : null;
 
-  if (!system || !name || !ownerName || !ownerEmail) {
-    return NextResponse.json({ error: "system, name, ownerName, and ownerEmail are required" }, { status: 400 });
+  if (!system || !name || !ownerName || !ownerEmail || !objectTypeId) {
+    return NextResponse.json(
+      { error: "system, name, ownerName, ownerEmail, and objectTypeId are required" },
+      { status: 400 }
+    );
   }
   if (!startDate || Number.isNaN(startDate.getTime()) || !endDate || Number.isNaN(endDate.getTime())) {
     return NextResponse.json({ error: "Valid startDate and endDate are required" }, { status: 400 });
@@ -59,8 +64,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "noticeUnit must be DAYS, WEEKS, or MONTHS" }, { status: 400 });
   }
 
+  const objectType = await prisma.objectType.findUnique({
+    where: { id: objectTypeId },
+    select: { id: true, isActive: true },
+  });
+  if (!objectType || !objectType.isActive) {
+    return NextResponse.json({ error: "objectTypeId must reference an active object type" }, { status: 400 });
+  }
+
   const cert = await prisma.certificate.create({
     data: {
+      objectTypeId,
       system,
       name,
       startDate,

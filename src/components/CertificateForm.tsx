@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import type { Certificate, NoticeUnit } from "@prisma/client";
+import type { Certificate, NoticeUnit, ObjectType } from "@prisma/client";
 
 const units: NoticeUnit[] = ["DAYS", "WEEKS", "MONTHS"];
 
@@ -15,9 +15,10 @@ function toDateInput(value: Date | string): string {
 
 type Props = {
   certificate?: Certificate;
+  objectTypes: ObjectType[];
 };
 
-export function CertificateForm({ certificate }: Props) {
+export function CertificateForm({ certificate, objectTypes }: Props) {
   const router = useRouter();
   const editing = Boolean(certificate);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +32,7 @@ export function CertificateForm({ certificate }: Props) {
     const fd = new FormData(form);
 
     const payload = {
+      objectTypeId: String(fd.get("objectTypeId") ?? "").trim(),
       system: String(fd.get("system") ?? "").trim(),
       name: String(fd.get("name") ?? "").trim(),
       description: String(fd.get("description") ?? "").trim() || null,
@@ -83,13 +85,28 @@ export function CertificateForm({ certificate }: Props) {
           />
         </label>
         <label className="block sm:col-span-2">
-          <span className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Certificate name</span>
+          <span className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Object type</span>
+          <select
+            name="objectTypeId"
+            required
+            defaultValue={certificate?.objectTypeId ?? objectTypes[0]?.id ?? ""}
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+          >
+            {objectTypes.map((type) => (
+              <option key={type.id} value={type.id}>
+                {type.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="block sm:col-span-2">
+          <span className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">Item name</span>
           <input
             name="name"
             required
             defaultValue={certificate?.name}
             className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-zinc-900 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
-            placeholder="e.g. Wildcard *.example.com"
+            placeholder="e.g. Wildcard *.example.com or annual renewal"
           />
         </label>
         <label className="block">
@@ -175,7 +192,7 @@ export function CertificateForm({ certificate }: Props) {
           disabled={pending}
           className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
         >
-          {pending ? "Saving…" : editing ? "Save changes" : "Create certificate"}
+          {pending ? "Saving..." : editing ? "Save changes" : "Create record"}
         </button>
         <button
           type="button"

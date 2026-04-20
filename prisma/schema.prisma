@@ -15,6 +15,8 @@ enum NoticeUnit {
 
 model Certificate {
   id                     String      @id @default(uuid())
+  objectTypeId           String
+  objectType             ObjectType  @relation(fields: [objectTypeId], references: [id], onDelete: Restrict)
   system                 String
   name                   String
   startDate              DateTime
@@ -29,6 +31,19 @@ model Certificate {
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
 
+  @@index([objectTypeId])
   @@index([endDate])
   @@index([ownerEmail])
+}
+
+model ObjectType {
+  id           String        @id @default(uuid())
+  name         String        @unique
+  slug         String        @unique
+  isActive     Boolean       @default(true)
+  certificates Certificate[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([isActive])
 }

@@ -11,6 +11,17 @@ function addDays(base: Date, days: number): Date {
 
 async function main() {
   await prisma.certificate.deleteMany();
+  await prisma.objectType.deleteMany();
+
+  const sslType = await prisma.objectType.create({
+    data: { name: "SSL certificate", slug: "ssl-certificate" },
+  });
+  const vpnType = await prisma.objectType.create({
+    data: { name: "3rd-party VPN access", slug: "3rd-party-vpn-access" },
+  });
+  const ispType = await prisma.objectType.create({
+    data: { name: "ISP contract", slug: "isp-contract" },
+  });
 
   const today = new Date();
   today.setUTCHours(12, 0, 0, 0);
@@ -18,6 +29,7 @@ async function main() {
   await prisma.certificate.createMany({
     data: [
       {
+        objectTypeId: sslType.id,
         system: "api.example.com",
         name: "API wildcard TLS",
         startDate: addDays(today, -400),
@@ -29,6 +41,7 @@ async function main() {
         noticeUnit: "DAYS",
       },
       {
+        objectTypeId: sslType.id,
         system: "www.example.com",
         name: "Primary site DV",
         startDate: addDays(today, -300),
@@ -40,6 +53,7 @@ async function main() {
         noticeUnit: "DAYS",
       },
       {
+        objectTypeId: sslType.id,
         system: "mail.example.com",
         name: "SMTP submission",
         startDate: addDays(today, -200),
@@ -51,6 +65,7 @@ async function main() {
         noticeUnit: "DAYS",
       },
       {
+        objectTypeId: sslType.id,
         system: "internal.corp",
         name: "Internal CA leaf",
         startDate: addDays(today, -500),
@@ -62,6 +77,7 @@ async function main() {
         noticeUnit: "WEEKS",
       },
       {
+        objectTypeId: sslType.id,
         system: "cdn.example.com",
         name: "CDN edge cert",
         startDate: addDays(today, -100),
@@ -73,21 +89,35 @@ async function main() {
         noticeUnit: "MONTHS",
       },
       {
-        system: "staging.example.com",
-        name: "Staging wildcard",
+        objectTypeId: vpnType.id,
+        system: "partner-gateway.acme.example",
+        name: "Partner remote access renewal",
         startDate: addDays(today, -90),
         endDate: addDays(today, 200),
-        description: "Outside notice window for demo.",
+        description: "Annual VPN access contract with 3rd-party support provider.",
         ownerName: "Riley Chen",
         ownerEmail: "riley@example.com",
         noticeQuantity: 30,
         noticeUnit: "DAYS",
       },
+      {
+        objectTypeId: ispType.id,
+        system: "Datacenter WAN link",
+        name: "Primary MPLS service agreement",
+        startDate: addDays(today, -180),
+        endDate: addDays(today, 45),
+        description: "ISP contract renewal window starts 2 months before end date.",
+        ownerName: "Taylor Singh",
+        ownerEmail: "taylor@example.com",
+        noticeQuantity: 2,
+        noticeUnit: "MONTHS",
+      },
     ],
   });
 
   const count = await prisma.certificate.count();
-  console.log(`Seeded ${count} certificates.`);
+  const typeCount = await prisma.objectType.count();
+  console.log(`Seeded ${count} tracked records across ${typeCount} object types.`);
 }
 
 main()
