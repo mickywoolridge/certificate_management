@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function NoticeDashboardPage() {
   const all = await prisma.certificate.findMany({
+    include: { objectType: true },
     orderBy: { endDate: "asc" },
   });
   const now = new Date();
@@ -18,15 +19,15 @@ export default async function NoticeDashboardPage() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Notice dashboard</h1>
           <p className="mt-2 max-w-2xl text-zinc-600 dark:text-zinc-400">
-            Certificates currently inside their configured notice window before expiry. Owners are emailed once when a
-            certificate first enters this window (via the scheduled notify job).
+            Tracked objects currently inside their configured notice window before expiry or renewal. Owners are emailed
+            once when an object first enters this window (via the scheduled notify job).
           </p>
         </div>
         <Link
           href="/certificates/new"
           className="inline-flex shrink-0 items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500"
         >
-          Add certificate
+          Add object
         </Link>
       </div>
 
@@ -35,7 +36,7 @@ export default async function NoticeDashboardPage() {
           {inWindow.length} in notice period
         </span>
         <Link href="/certificates" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
-          View all certificates →
+          View all tracked objects →
         </Link>
       </div>
 

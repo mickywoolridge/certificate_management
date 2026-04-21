@@ -10,7 +10,7 @@ export function CertificateDeleteButton({ id }: Props) {
   const [pending, setPending] = useState(false);
 
   async function onDelete() {
-    if (!window.confirm("Delete this certificate? This cannot be undone.")) return;
+    if (!window.confirm("Delete this tracked object? This cannot be undone.")) return;
     setPending(true);
     const res = await fetch(`/api/certificates/${id}`, { method: "DELETE" });
     setPending(false);
@@ -29,7 +29,7 @@ export function CertificateDeleteButton({ id }: Props) {
       disabled={pending}
       className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/40"
     >
-      {pending ? "Deleting…" : "Delete"}
+      {pending ? "Deleting..." : "Delete"}
     </button>
   );
 }

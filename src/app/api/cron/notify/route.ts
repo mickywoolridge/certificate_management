@@ -20,6 +20,7 @@ export async function POST(request: Request) {
 
   const certs = await prisma.certificate.findMany({
     where: { noticeEntryNotifiedAt: null },
+    include: { objectType: true },
   });
 
   const now = new Date();

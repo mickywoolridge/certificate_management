@@ -2,11 +2,13 @@ import type { Certificate } from "@prisma/client";
 import { formatNoticePeriod } from "./notice";
 
 type SendResult = { ok: true } | { ok: false; error: string };
+type NotifiableObject = Certificate & { objectType: { name: string } };
 
-export async function sendNoticeEntryEmail(cert: Certificate, appUrl: string): Promise<SendResult> {
-  const subject = `[SSL] "${cert.name}" entered its notice period`;
+export async function sendNoticeEntryEmail(cert: NotifiableObject, appUrl: string): Promise<SendResult> {
+  const subject = `[${cert.objectType.name}] "${cert.name}" entered its notice period`;
   const body = [
-    `Certificate: ${cert.name}`,
+    `Object type: ${cert.objectType.name}`,
+    `Item: ${cert.name}`,
     `System: ${cert.system}`,
     `Owner: ${cert.ownerName}`,
     `Expires: ${cert.endDate.toISOString().slice(0, 10)}`,

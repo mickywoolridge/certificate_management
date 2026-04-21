@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SSL certificate manager",
-  description: "Track SSL certificate expiry and notify owners in the notice window",
+  title: "Object expiry manager",
+  description: "Track expiring objects and notify owners in configured notice windows",
 };
 
 export default function RootLayout({
@@ -32,7 +32,7 @@ export default function RootLayout({
           Schedule{" "}
           <code className="rounded bg-zinc-100 px-1 py-0.5 text-[0.8rem] dark:bg-zinc-900">POST /api/cron/notify</code> daily
           with <code className="rounded bg-zinc-100 px-1 py-0.5 text-[0.8rem] dark:bg-zinc-900">CRON_SECRET</code> to email
-          owners when a certificate enters its notice period.
+          owners when an object enters its notice period.
         </footer>
       </body>
     </html>

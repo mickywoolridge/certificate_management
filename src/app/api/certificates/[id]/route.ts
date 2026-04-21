@@ -11,7 +11,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, context: Ctx) {
   const { id } = await context.params;
-  const cert = await prisma.certificate.findUnique({ where: { id } });
+  const cert = await prisma.certificate.findUnique({ where: { id }, include: { objectType: true } });
   if (!cert) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ certificate: cert });
 }
@@ -34,6 +34,17 @@ export async function PATCH(request: Request, context: Ctx) {
   if (typeof body.name === "string") data.name = body.name.trim();
   if (typeof body.ownerName === "string") data.ownerName = body.ownerName.trim();
   if (typeof body.ownerEmail === "string") data.ownerEmail = body.ownerEmail.trim();
+  if (typeof body.objectTypeId === "string") {
+    const objectTypeId = body.objectTypeId.trim();
+    const objectType = await prisma.objectType.findUnique({
+      where: { id: objectTypeId },
+      select: { isActive: true },
+    });
+    if (!objectType || !objectType.isActive) {
+      return NextResponse.json({ error: "objectTypeId must reference an active object type" }, { status: 400 });
+    }
+    data.objectTypeId = objectTypeId;
+  }
 
   if (body.description !== undefined) {
     data.description =

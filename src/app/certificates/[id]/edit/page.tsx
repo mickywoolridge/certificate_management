@@ -9,14 +9,19 @@ type Props = { params: Promise<{ id: string }> };
 
 export default async function EditCertificatePage({ params }: Props) {
   const { id } = await params;
-  const certificate = await prisma.certificate.findUnique({ where: { id } });
+  const [certificate, objectTypes] = await Promise.all([
+    prisma.certificate.findUnique({ where: { id } }),
+    prisma.objectType.findMany({
+      orderBy: [{ isActive: "desc" }, { name: "asc" }],
+    }),
+  ]);
   if (!certificate) notFound();
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="mb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Edit certificate</h1>
+          <h1 className="mb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Edit tracked object</h1>
           <p className="text-zinc-600 dark:text-zinc-400">
             Updating expiry or notice settings clears the “notice sent” flag so owners can be notified again for the new
             window.
@@ -24,7 +29,7 @@ export default async function EditCertificatePage({ params }: Props) {
         </div>
         <CertificateDeleteButton id={certificate.id} />
       </div>
-      <CertificateForm certificate={certificate} />
+      <CertificateForm certificate={certificate} objectTypes={objectTypes} />
     </div>
   );
 }
