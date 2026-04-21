@@ -25,7 +25,7 @@ export default async function CertificatesPage() {
         </Link>
       </div>
 
-      <CertificateTable certificates={certificates} />
+      <CertificateTable certificates={certificates} scrollable />
     </div>
   );
 }
