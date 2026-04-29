@@ -26,8 +26,7 @@ async function main() {
   const today = new Date();
   today.setUTCHours(12, 0, 0, 0);
 
-  await prisma.certificate.createMany({
-    data: [
+  const seedCertificates = [
       {
         objectTypeId: sslType.id,
         system: "api.example.com",
@@ -136,7 +135,68 @@ async function main() {
         noticeQuantity: 2,
         noticeUnit: "MONTHS",
       },
-    ],
+    ];
+
+  const owners = [
+    { name: "Alex Rivera", email: "alex@example.com" },
+    { name: "Jordan Lee", email: "jordan@example.com" },
+    { name: "Sam Okonkwo", email: "sam@example.com" },
+    { name: "Casey Kim", email: "casey@example.com" },
+    { name: "Morgan Patel", email: "morgan@example.com" },
+    { name: "Riley Chen", email: "riley@example.com" },
+    { name: "Taylor Singh", email: "taylor@example.com" },
+    { name: "Jamie Fox", email: "jamie@example.com" },
+    { name: "Avery Lopez", email: "avery@example.com" },
+    { name: "Quinn Davis", email: "quinn@example.com" },
+  ];
+
+  const systems = [
+    "api",
+    "portal",
+    "auth",
+    "billing",
+    "mail",
+    "cdn",
+    "vpn",
+    "analytics",
+    "support",
+    "internal",
+  ];
+
+  const domains = [
+    "example.com",
+    "corp.example",
+    "staging.example",
+    "edge.example",
+    "partner.example",
+  ];
+
+  const objectTypes = [sslType, vpnType, ispType];
+
+  const generatedCertificates = Array.from({ length: 111 }, (_, index) => {
+    const owner = owners[index % owners.length];
+    const objectType = objectTypes[index % objectTypes.length];
+    const system = `${systems[index % systems.length]}-${String(index + 1).padStart(3, "0")}.${domains[index % domains.length]}`;
+    const baseOffset = index * 3;
+    const startOffset = -540 + baseOffset;
+    const endOffset = -40 + baseOffset;
+
+    return {
+      objectTypeId: objectType.id,
+      system,
+      name: `${objectType.name} record ${String(index + 1).padStart(3, "0")}`,
+      startDate: addDays(today, startOffset),
+      endDate: addDays(today, endOffset),
+      description: `Generated seed record ${index + 1} for larger table testing.`,
+      ownerName: owner.name,
+      ownerEmail: owner.email,
+      noticeQuantity: (index % 3) + 1,
+      noticeUnit: index % 3 === 0 ? "DAYS" : index % 3 === 1 ? "WEEKS" : "MONTHS",
+    };
+  });
+
+  await prisma.certificate.createMany({
+    data: [...seedCertificates, ...generatedCertificates],
   });
 
   const count = await prisma.certificate.count();
