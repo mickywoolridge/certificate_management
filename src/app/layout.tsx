@@ -32,7 +32,8 @@ export default function RootLayout({
           Schedule{" "}
           <code className="rounded bg-zinc-100 px-1 py-0.5 text-[0.8rem] dark:bg-zinc-900">POST /api/cron/notify</code> daily
           with <code className="rounded bg-zinc-100 px-1 py-0.5 text-[0.8rem] dark:bg-zinc-900">CRON_SECRET</code> to email
-          owners when an object enters its notice period.
+          owners for each object still in its notice window (at most once per UTC day per row; notification count
+          increases each time).
         </footer>
       </body>
     </html>

@@ -23,8 +23,8 @@ export default async function EditCertificatePage({ params }: Props) {
         <div>
           <h1 className="mb-2 text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Edit tracked object</h1>
           <p className="text-zinc-600 dark:text-zinc-400">
-            Updating expiry or notice settings clears the “notice sent” flag so owners can be notified again for the new
-            window.
+            Updating expiry or notice settings resets the notification count and last-sent time so the daily cron can
+            start fresh for the new window.
           </p>
         </div>
         <CertificateDeleteButton id={certificate.id} />

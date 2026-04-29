@@ -20,7 +20,8 @@ export async function buildNoticeDashboardXlsx(rows: NoticeDashboardRow[]): Prom
     { header: "End date", key: "endDate", width: 14 },
     { header: "Days left", key: "daysLeft", width: 12 },
     { header: "Notice window", key: "noticeWindow", width: 22 },
-    { header: "Owner notified", key: "notified", width: 16 },
+    { header: "Notification count", key: "count", width: 18 },
+    { header: "Last notified (UTC)", key: "lastAt", width: 18 },
   ];
 
   for (const c of rows) {
@@ -34,18 +35,19 @@ export async function buildNoticeDashboardXlsx(rows: NoticeDashboardRow[]): Prom
       endDate: c.endDate.toISOString().slice(0, 10),
       daysLeft: days < 0 ? "Expired" : String(days),
       noticeWindow: `${formatNoticePeriod(c.noticeQuantity, c.noticeUnit)} before end`,
-      notified: c.noticeEntryNotifiedAt ? "Yes" : "No",
+      count: c.notificationCount,
+      lastAt: c.lastNotifiedAt ? c.lastNotifiedAt.toISOString().slice(0, 10) : "",
     });
   }
 
   detail.getRow(1).font = { bold: true };
 
-  const byType = new Map<string, { inNotice: number; notified: number }>();
+  const byType = new Map<string, { inNotice: number; notificationSum: number }>();
   for (const c of rows) {
     const name = c.objectType.name;
-    const cur = byType.get(name) ?? { inNotice: 0, notified: 0 };
+    const cur = byType.get(name) ?? { inNotice: 0, notificationSum: 0 };
     cur.inNotice += 1;
-    if (c.noticeEntryNotifiedAt) cur.notified += 1;
+    cur.notificationSum += c.notificationCount;
     byType.set(name, cur);
   }
 
@@ -53,11 +55,11 @@ export async function buildNoticeDashboardXlsx(rows: NoticeDashboardRow[]): Prom
   summary.columns = [
     { header: "Object type", key: "t", width: 32 },
     { header: "In notice period", key: "n", width: 18 },
-    { header: "Owner notified", key: "r", width: 18 },
+    { header: "Total notifications", key: "r", width: 22 },
   ];
   summary.getRow(1).font = { bold: true };
   for (const [name, counts] of Array.from(byType.entries()).sort((a, b) => a[0].localeCompare(b[0]))) {
-    summary.addRow({ t: name, n: counts.inNotice, r: counts.notified });
+    summary.addRow({ t: name, n: counts.inNotice, r: counts.notificationSum });
   }
 
   const buf = await workbook.xlsx.writeBuffer();

@@ -1,6 +1,6 @@
 /**
- * Inserts demo certificates in the notice window so dashboard chips differ:
- * "X in notice · Y notified" (Y uses noticeEntryNotifiedAt).
+ * Inserts demo certificates in the notice window with varied notificationCount / lastNotifiedAt
+ * so the dashboard shows per-row counts and type-level sums.
  *
  * Idempotent: removes prior rows whose name starts with "[Demo notify-proof]".
  *
@@ -39,6 +39,7 @@ async function main() {
   const now = new Date();
   now.setUTCHours(12, 0, 0, 0);
   const notifiedYesterday = addDays(now, -1);
+  const notifiedThreeDaysAgo = addDays(now, -3);
 
   const rows: Array<{
     objectTypeId: string;
@@ -51,86 +52,89 @@ async function main() {
     ownerEmail: string;
     noticeQuantity: number;
     noticeUnit: NoticeUnit;
-    noticeEntryNotifiedAt: Date | null;
+    notificationCount: number;
+    lastNotifiedAt: Date | null;
   }> = [];
 
   const t0 = types[0]!;
   const t1 = types[1]!;
   const t2 = types[2] ?? t0;
 
-  // Type 0: 2 in notice, 1 notified, 1 pending
   rows.push(
     {
       objectTypeId: t0.id,
-      system: `demo-notify-pending.${t0.slug}.example`,
-      name: `${DEMO_PREFIX} ${t0.name} — pending email`,
+      system: `demo-notify-zero.${t0.slug}.example`,
+      name: `${DEMO_PREFIX} ${t0.name} — 0 sends`,
       startDate: addDays(now, -120),
       endDate: addDays(now, 6),
-      description: "In 30-day notice window; owner has not been emailed yet (noticeEntryNotifiedAt null).",
-      ownerName: "Demo Owner Pending",
-      ownerEmail: "demo-pending@example.com",
+      description: "In notice window; cron has not sent yet (count 0).",
+      ownerName: "Demo Owner Zero",
+      ownerEmail: "demo-zero@example.com",
       noticeQuantity: 30,
       noticeUnit: NoticeUnit.DAYS,
-      noticeEntryNotifiedAt: null,
+      notificationCount: 0,
+      lastNotifiedAt: null,
     },
     {
       objectTypeId: t0.id,
-      system: `demo-notify-sent.${t0.slug}.example`,
-      name: `${DEMO_PREFIX} ${t0.name} — owner notified`,
+      system: `demo-notify-multi.${t0.slug}.example`,
+      name: `${DEMO_PREFIX} ${t0.name} — 5 sends`,
       startDate: addDays(now, -100),
       endDate: addDays(now, 10),
-      description: "In notice window; simulates cron having set noticeEntryNotifiedAt.",
-      ownerName: "Demo Owner Notified",
-      ownerEmail: "demo-notified@example.com",
+      description: "Simulates five successful daily reminders while in window.",
+      ownerName: "Demo Owner Multi",
+      ownerEmail: "demo-multi@example.com",
       noticeQuantity: 30,
       noticeUnit: NoticeUnit.DAYS,
-      noticeEntryNotifiedAt: notifiedYesterday,
+      notificationCount: 5,
+      lastNotifiedAt: notifiedYesterday,
     },
   );
 
-  // Type 1: 2 in notice, both notified (so "notified" can equal "in notice" for one type)
   rows.push(
     {
       objectTypeId: t1.id,
-      system: `demo-notify-sent-a.${t1.slug}.example`,
-      name: `${DEMO_PREFIX} ${t1.name} — notified A`,
+      system: `demo-notify-three.${t1.slug}.example`,
+      name: `${DEMO_PREFIX} ${t1.name} — 3 sends`,
       startDate: addDays(now, -90),
       endDate: addDays(now, 14),
-      description: "In notice window; notified.",
-      ownerName: "Demo Notified A",
-      ownerEmail: "demo-na@example.com",
+      description: "Three reminders logged.",
+      ownerName: "Demo Three",
+      ownerEmail: "demo-three@example.com",
       noticeQuantity: 30,
       noticeUnit: NoticeUnit.DAYS,
-      noticeEntryNotifiedAt: notifiedYesterday,
+      notificationCount: 3,
+      lastNotifiedAt: notifiedThreeDaysAgo,
     },
     {
       objectTypeId: t1.id,
-      system: `demo-notify-sent-b.${t1.slug}.example`,
-      name: `${DEMO_PREFIX} ${t1.name} — notified B`,
+      system: `demo-notify-one.${t1.slug}.example`,
+      name: `${DEMO_PREFIX} ${t1.name} — 1 send`,
       startDate: addDays(now, -80),
       endDate: addDays(now, 20),
-      description: "In notice window; notified.",
-      ownerName: "Demo Notified B",
-      ownerEmail: "demo-nb@example.com",
+      description: "Single first-day reminder.",
+      ownerName: "Demo One",
+      ownerEmail: "demo-one@example.com",
       noticeQuantity: 30,
       noticeUnit: NoticeUnit.DAYS,
-      noticeEntryNotifiedAt: notifiedYesterday,
+      notificationCount: 1,
+      lastNotifiedAt: notifiedYesterday,
     },
   );
 
-  // Type 2 (or repeat): 1 in notice, pending — spreads "pending" across another type
   rows.push({
     objectTypeId: t2.id,
-    system: `demo-notify-pending-2.${t2.slug}.example`,
-    name: `${DEMO_PREFIX} ${t2.name} — pending only`,
+    system: `demo-notify-twelve.${t2.slug}.example`,
+    name: `${DEMO_PREFIX} ${t2.name} — 12 sends`,
     startDate: addDays(now, -200),
     endDate: addDays(now, 5),
-    description: "Second object type with only a pending notify row.",
-    ownerName: "Demo Owner Pending 2",
-    ownerEmail: "demo-pending2@example.com",
+    description: "High count to stand out in the Notifications column.",
+    ownerName: "Demo Twelve",
+    ownerEmail: "demo-twelve@example.com",
     noticeQuantity: 30,
     noticeUnit: NoticeUnit.DAYS,
-    noticeEntryNotifiedAt: null,
+    notificationCount: 12,
+    lastNotifiedAt: notifiedYesterday,
   });
 
   await prisma.certificate.createMany({ data: rows });
@@ -141,24 +145,24 @@ async function main() {
   });
 
   const inWindow = verify.filter((c) => isInNoticePeriod(c, now));
-  const notified = inWindow.filter((c) => c.noticeEntryNotifiedAt != null).length;
+  const sumCounts = inWindow.reduce((s, c) => s + c.notificationCount, 0);
 
   console.log(`Inserted ${rows.length} demo rows (${inWindow.length} in notice window right now).`);
-  console.log(`Among those, ${notified} have noticeEntryNotifiedAt set (shown as "notified" on dashboard).`);
+  console.log(`Sum of notificationCount across demo rows in window: ${sumCounts}.`);
 
-  const byType = new Map<string, { inNotice: number; notified: number }>();
+  const byType = new Map<string, { inNotice: number; notificationSum: number }>();
   for (const c of inWindow) {
     const n = c.objectType.name;
-    const cur = byType.get(n) ?? { inNotice: 0, notified: 0 };
+    const cur = byType.get(n) ?? { inNotice: 0, notificationSum: 0 };
     cur.inNotice += 1;
-    if (c.noticeEntryNotifiedAt) cur.notified += 1;
+    cur.notificationSum += c.notificationCount;
     byType.set(n, cur);
   }
-  console.log("Demo-only contribution by object type (dashboard chips also include any other in-window rows):");
+  console.log("Demo-only contribution by object type (dashboard also includes other in-window rows):");
   for (const [name, v] of Array.from(byType.entries()).sort((a, b) => a[0].localeCompare(b[0]))) {
-    console.log(`  ${name}: ${v.inNotice} in notice · ${v.notified} notified`);
+    console.log(`  ${name}: ${v.inNotice} in notice · ${v.notificationSum} notifications (sum of counts)`);
   }
-  console.log(`In the table, find names starting with "${DEMO_PREFIX}" — Owner notified shows Pending vs Yes + date.`);
+  console.log(`In the table, find names starting with "${DEMO_PREFIX}" — Notifications column shows count + last sent date.`);
 }
 
 main()

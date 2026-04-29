@@ -26,8 +26,9 @@ model Certificate {
   ownerEmail             String
   noticeQuantity         Int
   noticeUnit             NoticeUnit
-  /// Set when the owner was notified that this certificate entered its notice window (once per renewal cycle).
-  noticeEntryNotifiedAt  DateTime?
+  /// Successful reminder emails sent while this row is in its notice window (cron, at most once per UTC day).
+  notificationCount      Int         @default(0)
+  lastNotifiedAt         DateTime?
   createdAt              DateTime    @default(now())
   updatedAt              DateTime    @updatedAt
 

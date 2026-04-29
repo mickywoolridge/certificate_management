@@ -4,9 +4,24 @@ import { formatNoticePeriod } from "./notice";
 type SendResult = { ok: true } | { ok: false; error: string };
 type NotifiableObject = Certificate & { objectType: { name: string } };
 
-export async function sendNoticeEntryEmail(cert: NotifiableObject, appUrl: string): Promise<SendResult> {
-  const subject = `[${cert.objectType.name}] "${cert.name}" entered its notice period`;
+/**
+ * @param nextCount — notification count after this send succeeds (1 = first email in this window).
+ */
+export async function sendNoticeReminderEmail(
+  cert: NotifiableObject,
+  appUrl: string,
+  nextCount: number
+): Promise<SendResult> {
+  const isFirst = nextCount === 1;
+  const subject = isFirst
+    ? `[${cert.objectType.name}] "${cert.name}" entered its notice period`
+    : `[${cert.objectType.name}] Reminder #${nextCount}: "${cert.name}" approaching expiry`;
+
   const body = [
+    isFirst
+      ? `This tracked object has entered its configured notice window before expiry or renewal.`
+      : `Daily reminder #${nextCount} while this object remains in its notice window.`,
+    ``,
     `Object type: ${cert.objectType.name}`,
     `Item: ${cert.name}`,
     `System: ${cert.system}`,

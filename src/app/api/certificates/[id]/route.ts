@@ -90,7 +90,8 @@ export async function PATCH(request: Request, context: Ctx) {
     data.startDate !== undefined;
 
   if (noticeChanged) {
-    data.noticeEntryNotifiedAt = null;
+    data.notificationCount = 0;
+    data.lastNotifiedAt = null;
   }
 
   if (Object.keys(data).length === 0) {

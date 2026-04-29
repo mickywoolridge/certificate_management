@@ -28,3 +28,12 @@ export function formatNoticePeriod(quantity: number, unit: NoticeUnit): string {
     unit === "DAYS" ? (quantity === 1 ? "day" : "days") : unit === "WEEKS" ? (quantity === 1 ? "week" : "weeks") : quantity === 1 ? "month" : "months";
   return `${quantity} ${label}`;
 }
+
+/** True when both instants fall on the same calendar day in UTC (used to cap reminder emails to once per day). */
+export function isSameUtcCalendarDay(a: Date, b: Date): boolean {
+  return (
+    a.getUTCFullYear() === b.getUTCFullYear() &&
+    a.getUTCMonth() === b.getUTCMonth() &&
+    a.getUTCDate() === b.getUTCDate()
+  );
+}

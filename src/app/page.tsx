@@ -14,8 +14,9 @@ export default async function NoticeDashboardPage() {
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Notice dashboard</h1>
           <p className="mt-2 max-w-2xl text-zinc-600 dark:text-zinc-400">
-            Tracked objects currently inside their configured notice window before expiry or renewal. Owners are emailed
-            once when an object first enters this window (via the scheduled notify job).
+            Tracked objects currently inside their configured notice window before expiry or renewal. Schedule the notify
+            cron daily: each row gets at most one reminder per UTC day while it stays in the window, and the notification
+            count on each record increases with every successful send.
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
@@ -45,7 +46,7 @@ export default async function NoticeDashboardPage() {
 
       <NoticeTypeSummary certificates={inWindow} />
 
-      <CertificateTable certificates={inWindow} showNoticeColumn showOwnerNotifiedColumn />
+      <CertificateTable certificates={inWindow} showNoticeColumn showNotificationCountColumn />
     </div>
   );
 }
