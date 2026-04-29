@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { NoticeUnit, PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -37,7 +37,7 @@ async function main() {
         ownerName: "Alex Rivera",
         ownerEmail: "alex@example.com",
         noticeQuantity: 30,
-        noticeUnit: "DAYS",
+        noticeUnit: NoticeUnit.DAYS,
       },
       {
         objectTypeId: sslType.id,
@@ -49,7 +49,7 @@ async function main() {
         ownerName: "Jordan Lee",
         ownerEmail: "jordan@example.com",
         noticeQuantity: 30,
-        noticeUnit: "DAYS",
+        noticeUnit: NoticeUnit.DAYS,
       },
       {
         objectTypeId: sslType.id,
@@ -61,7 +61,7 @@ async function main() {
         ownerName: "Sam Okonkwo",
         ownerEmail: "sam@example.com",
         noticeQuantity: 14,
-        noticeUnit: "DAYS",
+        noticeUnit: NoticeUnit.DAYS,
       },
       {
         objectTypeId: sslType.id,
@@ -73,7 +73,7 @@ async function main() {
         ownerName: "Casey Kim",
         ownerEmail: "casey@example.com",
         noticeQuantity: 2,
-        noticeUnit: "WEEKS",
+        noticeUnit: NoticeUnit.WEEKS,
       },
       {
         objectTypeId: sslType.id,
@@ -85,7 +85,7 @@ async function main() {
         ownerName: "Morgan Patel",
         ownerEmail: "morgan@example.com",
         noticeQuantity: 1,
-        noticeUnit: "MONTHS",
+        noticeUnit: NoticeUnit.MONTHS,
       },
       {
         objectTypeId: vpnType.id,
@@ -97,7 +97,7 @@ async function main() {
         ownerName: "Riley Chen",
         ownerEmail: "riley@example.com",
         noticeQuantity: 30,
-        noticeUnit: "DAYS",
+        noticeUnit: NoticeUnit.DAYS,
       },
       {
         objectTypeId: vpnType.id,
@@ -109,7 +109,7 @@ async function main() {
         ownerName: "Riley Chen",
         ownerEmail: "riley@example.com",
         noticeQuantity: 30,
-        noticeUnit: "DAYS",
+        noticeUnit: NoticeUnit.DAYS,
       },
       {
         objectTypeId: ispType.id,
@@ -121,7 +121,7 @@ async function main() {
         ownerName: "Taylor Singh",
         ownerEmail: "taylor@example.com",
         noticeQuantity: 2,
-        noticeUnit: "MONTHS",
+        noticeUnit: NoticeUnit.MONTHS,
       },
       {
         objectTypeId: ispType.id,
@@ -133,7 +133,7 @@ async function main() {
         ownerName: "Taylor Singh",
         ownerEmail: "taylor@example.com",
         noticeQuantity: 2,
-        noticeUnit: "MONTHS",
+        noticeUnit: NoticeUnit.MONTHS,
       },
     ];
 
@@ -191,7 +191,12 @@ async function main() {
       ownerName: owner.name,
       ownerEmail: owner.email,
       noticeQuantity: (index % 3) + 1,
-      noticeUnit: index % 3 === 0 ? "DAYS" : index % 3 === 1 ? "WEEKS" : "MONTHS",
+      noticeUnit:
+        index % 3 === 0
+          ? NoticeUnit.DAYS
+          : index % 3 === 1
+            ? NoticeUnit.WEEKS
+            : NoticeUnit.MONTHS,
     };
   });
 
