@@ -1,17 +1,12 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
-import { isInNoticePeriod } from "@/lib/notice";
+import { getCertificatesInNoticeWindow } from "@/lib/dashboard-in-window";
 import { CertificateTable } from "@/components/CertificateTable";
+import { NoticeTypeSummary } from "@/components/NoticeTypeSummary";
 
 export const dynamic = "force-dynamic";
 
 export default async function NoticeDashboardPage() {
-  const all = await prisma.certificate.findMany({
-    include: { objectType: true },
-    orderBy: { endDate: "asc" },
-  });
-  const now = new Date();
-  const inWindow = all.filter((c) => isInNoticePeriod(c, now));
+  const inWindow = await getCertificatesInNoticeWindow();
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
@@ -23,12 +18,20 @@ export default async function NoticeDashboardPage() {
             once when an object first enters this window (via the scheduled notify job).
           </p>
         </div>
-        <Link
-          href="/certificates/new"
-          className="inline-flex shrink-0 items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500"
-        >
-          Add object
-        </Link>
+        <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center">
+          <a
+            href="/api/dashboard/export"
+            className="inline-flex items-center justify-center rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-800 shadow-sm hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800"
+          >
+            Download Excel
+          </a>
+          <Link
+            href="/certificates/new"
+            className="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500"
+          >
+            Add object
+          </Link>
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center gap-3">
@@ -40,7 +43,9 @@ export default async function NoticeDashboardPage() {
         </Link>
       </div>
 
-      <CertificateTable certificates={inWindow} showNoticeColumn />
+      <NoticeTypeSummary certificates={inWindow} />
+
+      <CertificateTable certificates={inWindow} showNoticeColumn showOwnerNotifiedColumn />
     </div>
   );
 }
