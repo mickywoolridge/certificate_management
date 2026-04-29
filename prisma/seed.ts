@@ -22,6 +22,15 @@ async function main() {
   const ispType = await prisma.objectType.create({
     data: { name: "ISP contract", slug: "isp-contract" },
   });
+  const codeSigningType = await prisma.objectType.create({
+    data: { name: "Code signing certificate", slug: "code-signing-certificate" },
+  });
+  const domainType = await prisma.objectType.create({
+    data: { name: "Domain registration", slug: "domain-registration" },
+  });
+  const softwareLicenseType = await prisma.objectType.create({
+    data: { name: "Software license / subscription", slug: "software-license-subscription" },
+  });
 
   const today = new Date();
   today.setUTCHours(12, 0, 0, 0);
@@ -135,6 +144,78 @@ async function main() {
         noticeQuantity: 2,
         noticeUnit: NoticeUnit.MONTHS,
       },
+      {
+        objectTypeId: codeSigningType.id,
+        system: "release-engineering / desktop installer",
+        name: "Windows Authenticode signing (EV)",
+        startDate: addDays(today, -270),
+        endDate: addDays(today, 95),
+        description: "EV code signing for shipped binaries; renew before hardware token revalidation.",
+        ownerName: "Jamie Fox",
+        ownerEmail: "jamie@example.com",
+        noticeQuantity: 45,
+        noticeUnit: NoticeUnit.DAYS,
+      },
+      {
+        objectTypeId: codeSigningType.id,
+        system: "mobile-release / iOS pipeline",
+        name: "Apple distribution signing profile",
+        startDate: addDays(today, -120),
+        endDate: addDays(today, -5),
+        description: "Expired distribution profile — blocks store uploads until renewed.",
+        ownerName: "Avery Lopez",
+        ownerEmail: "avery@example.com",
+        noticeQuantity: 14,
+        noticeUnit: NoticeUnit.DAYS,
+      },
+      {
+        objectTypeId: domainType.id,
+        system: "example.com",
+        name: "Primary corporate domain (registrar)",
+        startDate: addDays(today, -800),
+        endDate: addDays(today, 60),
+        description: "Registrar renewal; transfer lock enabled.",
+        ownerName: "Quinn Davis",
+        ownerEmail: "quinn@example.com",
+        noticeQuantity: 30,
+        noticeUnit: NoticeUnit.DAYS,
+      },
+      {
+        objectTypeId: domainType.id,
+        system: "product.io",
+        name: "Marketing TLD renewal",
+        startDate: addDays(today, -400),
+        endDate: addDays(today, 18),
+        description: "Inside renewal window — DNS and email routing depend on active registration.",
+        ownerName: "Jordan Lee",
+        ownerEmail: "jordan@example.com",
+        noticeQuantity: 1,
+        noticeUnit: NoticeUnit.MONTHS,
+      },
+      {
+        objectTypeId: softwareLicenseType.id,
+        system: "Atlassian Cloud / Jira",
+        name: "Enterprise Jira + Confluence subscription",
+        startDate: addDays(today, -200),
+        endDate: addDays(today, 30),
+        description: "Annual SaaS term; procurement lead time ~6 weeks.",
+        ownerName: "Casey Kim",
+        ownerEmail: "casey@example.com",
+        noticeQuantity: 6,
+        noticeUnit: NoticeUnit.WEEKS,
+      },
+      {
+        objectTypeId: softwareLicenseType.id,
+        system: "Data platform / Snowflake",
+        name: "Snowflake capacity commitment",
+        startDate: addDays(today, -330),
+        endDate: addDays(today, -20),
+        description: "Expired commitment period — renegotiate or true-up usage.",
+        ownerName: "Morgan Patel",
+        ownerEmail: "morgan@example.com",
+        noticeQuantity: 60,
+        noticeUnit: NoticeUnit.DAYS,
+      },
     ];
 
   const owners = [
@@ -171,7 +252,14 @@ async function main() {
     "partner.example",
   ];
 
-  const objectTypes = [sslType, vpnType, ispType];
+  const objectTypes = [
+    sslType,
+    vpnType,
+    ispType,
+    codeSigningType,
+    domainType,
+    softwareLicenseType,
+  ];
 
   const generatedCertificates = Array.from({ length: 111 }, (_, index) => {
     const owner = owners[index % owners.length];
